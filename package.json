@@ -1,0 +1,33 @@
+{
+  "name": "sort-file",
+  "version": "0.0.1",
+  "description": "sort file name",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lei006/sort-file.git"
+  },
+  "author": {
+    "name": "WangLei",
+    "email": "lei006@qq.com",
+    "url": "https://github.com/lei006"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lei006/sort-file/issues"
+  },
+  "homepage": "https://github.com/lei006/sort-file#readme",
+  "devDependencies": {
+    "mocha": "^5.2.0"
+  },
+  "dependencies": {
+    "string-random": "^0.1.3"
+  }
+}
