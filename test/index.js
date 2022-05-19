@@ -7,7 +7,6 @@
 'use strict';
 
 var assert = require('assert');
-const random = require('string-random');
 
 
 
