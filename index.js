@@ -32,60 +32,34 @@ function SortFile(filelist, options) {
   }
 
   
-  function order_func(str_a, str_b, is_number) {
+  function order_func(step_a, step_b) {
 
-
-    if(is_number == true) {
-      //不同的部分是数字...
-
-      let num_a = Number(str_a);
-      let num_b = Number(str_b);
-
-      if(num_a>num_b) {
+      //字符串部分比较
+      if(step_a.str > step_b.str) {
+        //字符串-大于
         return order_add;
       }
-      else if(num_a<num_b) {
+      else if(step_a.str < step_b.str) {
+        //字符串-小于
+        return order_dec;
+      }
+
+      // 数字部分比较
+      if(step_a.num > step_b.num) {
+        return order_add;
+      }
+      else if(step_a.num < step_b.num) {
         return order_dec;
       }
       else {
         return 0;
       }
-
-    }else{
-
-      if(str_a>str_b) {
-        return order_add;
-      }
-      else if(str_a<str_b) {
-        return order_dec;
-      }
-      else {
-        return 0;
-      }
-    }
   }
-  //取得字符串，最后数字的位置
-  function get_last_num_pos(str){
-    let pos = 0;
-    for (let i = str.length - 1; i >= 0; i--) {
-      const element = str.charAt(i);
-      if(isNaN(element)) {
-        break;
-      }else{
-        pos = i;
-      }
-    }
-
-
-
-    return pos;
-  }
+  
   
   function field_sep(str){
     let out = {str:"", num:0};
-    let pos = 0;
-    if(str.length)
-
+    let pos = str.length;
 
     for (let i = str.length - 1; ; i--) {
       if(i<0) {
@@ -93,20 +67,26 @@ function SortFile(filelist, options) {
       }
 
       const element = str.charAt(i);
-      //console.log(element);
       if(isNaN(element)) {
-        pos = i;
+        pos = i + 1;
         break;
       }
       pos = i;
-
     }
 
-    out.str = str.substring(0, pos);
-    out.num = str.substring(pos);
-    console.log("field_sep", str, "  pos=", pos, out);
-    
 
+    if(pos>0){
+      out.str = str.substring(0, pos);
+    }
+
+    out.num = str.substring(pos);
+    if(out.num == ""){
+      out.num = "0";
+    }
+    out.num = Number(out.num);
+
+    //console.log(pos, '->', out, " [", str, "]", );
+    
     return out;
   }
 
@@ -141,39 +121,15 @@ function SortFile(filelist, options) {
         let sep1 = field_sep(element_a);
         let sep2 = field_sep(element_b);
         
-
-        ///////////////////////////////////////////////
-        // 区分，相同部分与字相同部分--开始
-        let a_last_num_pos = get_last_num_pos(element_a);
-        let b_last_num_pos = get_last_num_pos(element_b);
-
-        //取字母部分
-        let diff_str_a = element_a.substring(0, a_last_num_pos);
-        let diff_str_b = element_b.substring(0, b_last_num_pos);
-        
-        //取数字部分..
-        let diff_num_a = element_a.substring(a_last_num_pos);
-        let diff_num_b = element_b.substring(b_last_num_pos);
-
         let ret_val = 0;
 
         ///////////////////////////////////////////////
-        //字母部分不同..则按字母部分排序
-        if(diff_str_a != diff_str_b){
-          ret_val = order_func(diff_str_a, diff_str_b, false);
-          return ret_val;
-        }
-        
-        ///////////////////////////////////////////////
         //字母部分相同..则按数字部分排序
-        ret_val = order_func(diff_num_a, diff_num_b, true);
+        ret_val = order_func(sep1, sep2);
         if(ret_val != 0) {
           return ret_val;
         }
 
-        ///////////////////////////////////////////////
-        // 还有一种可能就是 aa010.txt  aa00010.txt --不处理，进入下一个节点
-        
       }
 
       if(file_a_list_length > file_b_list_length) {
@@ -196,3 +152,4 @@ function SortFile(filelist, options) {
 }
 
 module.exports = SortFile.default = SortFile;
+
