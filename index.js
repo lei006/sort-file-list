@@ -21,21 +21,21 @@ function SortFile(filelist, options) {
   //options.node || true;
   options.separator || (options.separator = ".");
 
-  console.log("separator = ", options.separator);
-  
+  // 返回值的正负值
+  let order_add = 1;
+  let order_dec = -1;
+
+  //处理倒序..
+  if(options.reverse == true) {
+    order_add = -1;
+    order_dec = 1;  
+  }
 
   
-  function order_func(str_a, str_b, str_options) {
-    let order_add = 1;
-    let order_dec = -1;
-
-    if(str_options.reverse == true) {
-      order_add = -1;
-      order_dec = 1;  
-    }
+  function order_func(str_a, str_b, is_number) {
 
 
-    if(options.diff_is_number == true) {
+    if(is_number == true) {
       //不同的部分是数字...
 
       let num_a = Number(str_a);
@@ -62,26 +62,62 @@ function SortFile(filelist, options) {
       else {
         return 0;
       }
-
     }
-
-    function isIntNum(val) {
-      var regPos = / ^\d+$/; // 非负整数
-      var regNeg = /^\-[1-9][0-9]*$/; // 负整数
-      if(regPos.test(val) || regNeg.test(val)){
-          return true;
+  }
+  //取得字符串，最后数字的位置
+  function get_last_num_pos(str){
+    let pos = 0;
+    for (let i = str.length - 1; i >= 0; i--) {
+      const element = str.charAt(i);
+      if(isNaN(element)) {
+        break;
       }else{
-          return false;
+        pos = i;
       }
     }
 
 
 
+    return pos;
+  }
+  
+  function field_sep(str){
+    let out = {str:"", num:0};
+    let pos = 0;
+    if(str.length)
+
+
+    for (let i = str.length - 1; ; i--) {
+      if(i<0) {
+        break;
+      }
+
+      const element = str.charAt(i);
+      //console.log(element);
+      if(isNaN(element)) {
+        pos = i;
+        break;
+      }
+      pos = i;
+
+    }
+
+    out.str = str.substring(0, pos);
+    out.num = str.substring(pos);
+    console.log("field_sep", str, "  pos=", pos, out);
+    
+
+    return out;
   }
 
 
 
+
   filelist.sort(function(file_a,file_b){
+
+      if(file_a === file_b) {
+        return 0; //二者完全相同,比较下一节点
+      }
 
 
       let file_a_list = file_a.split(options.separator);
@@ -97,40 +133,47 @@ function SortFile(filelist, options) {
         const element_a = file_a_list[i];
         const element_b = file_b_list[i];
 
-        ///////////////////////////////////////////////
-        // 去除，相同部分--开始
-        let str_a_len = element_a.length;
-        let str_b_len = element_b.length;
-        // 最少长度
-        let str_min_len = str_a_len<str_b_len?str_a_len:str_b_len;
-
-        let diff_pos = 0;
-        for (let i = 0; i < str_min_len; i++) {
-          const ele_a = element_a[i];
-          const ele_b = element_b[i];
-          if(ele_a !== ele_b) {
-            diff_pos = i; //计录二个字符串不同的起始位置...
-            break;
-          }
-          if( (i + 1) == str_min_len) {
-            // 解决 相同长度，取得的长度少一的BUG
-            diff_pos = i+1;
-            break;
-          }
-
+        
+        if(element_a === element_b) {
+          continue; //二者完全相同,比较下一节点
         }
-  
-        let diff_str_a = (element_a.substring(diff_pos));
-        let diff_str_b = (element_b.substring(diff_pos));
 
-        // 去除，相同部分--结束
+        let sep1 = field_sep(element_a);
+        let sep2 = field_sep(element_b);
+        
+
         ///////////////////////////////////////////////
+        // 区分，相同部分与字相同部分--开始
+        let a_last_num_pos = get_last_num_pos(element_a);
+        let b_last_num_pos = get_last_num_pos(element_b);
 
-        //找同一节点...
-        let ret_val = order_func(diff_str_a, diff_str_b, options);
+        //取字母部分
+        let diff_str_a = element_a.substring(0, a_last_num_pos);
+        let diff_str_b = element_b.substring(0, b_last_num_pos);
+        
+        //取数字部分..
+        let diff_num_a = element_a.substring(a_last_num_pos);
+        let diff_num_b = element_b.substring(b_last_num_pos);
+
+        let ret_val = 0;
+
+        ///////////////////////////////////////////////
+        //字母部分不同..则按字母部分排序
+        if(diff_str_a != diff_str_b){
+          ret_val = order_func(diff_str_a, diff_str_b, false);
+          return ret_val;
+        }
+        
+        ///////////////////////////////////////////////
+        //字母部分相同..则按数字部分排序
+        ret_val = order_func(diff_num_a, diff_num_b, true);
         if(ret_val != 0) {
           return ret_val;
         }
+
+        ///////////////////////////////////////////////
+        // 还有一种可能就是 aa010.txt  aa00010.txt --不处理，进入下一个节点
+        
       }
 
       if(file_a_list_length > file_b_list_length) {
