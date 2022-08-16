@@ -107,30 +107,56 @@ function SortFile(filelist, options) {
       let file_a_list_length = file_a_list.length;
       let file_b_list_length = file_b_list.length;
 
-      let length = file_a_list_length<file_b_list_length?file_a_list_length:file_b_list_length;
+      if(file_a_list_length == file_b_list_length) {
+          //节点数相同..
+          let length = file_a_list_length;
+          for (let i = length-1; i >= 0; i--) {
+            const element_a = file_a_list[i];
+            const element_b = file_b_list[i];
+  
+            if(element_a === element_b) {
+              continue; //二者完全相同,比较下一节点
+            }
+  
+            let sep1 = field_sep(element_a);
+            let sep2 = field_sep(element_b);
+            
+            let ret_val = 0;
+  
+            ///////////////////////////////////////////////
+            //字母部分相同..则按数字部分排序
+            ret_val = order_func(sep1, sep2);
+            if(ret_val != 0) {
+              return ret_val;
+            }
+          }
+      }else{
+        //节点数不同，从头比较...
+        let length = file_a_list_length<file_b_list_length?file_a_list_length:file_b_list_length;
+        for (let i = 0; i < length; i++) {
+          const element_a = file_a_list[i];
+          const element_b = file_b_list[i];
 
-      for (let i = 0; i < length; i++) {
-        const element_a = file_a_list[i];
-        const element_b = file_b_list[i];
+          
+          if(element_a === element_b) {
+            continue; //二者完全相同,比较下一节点
+          }
 
-        
-        if(element_a === element_b) {
-          continue; //二者完全相同,比较下一节点
-        }
+          let sep1 = field_sep(element_a);
+          let sep2 = field_sep(element_b);
+          
+          let ret_val = 0;
 
-        let sep1 = field_sep(element_a);
-        let sep2 = field_sep(element_b);
-        
-        let ret_val = 0;
-
-        ///////////////////////////////////////////////
-        //字母部分相同..则按数字部分排序
-        ret_val = order_func(sep1, sep2);
-        if(ret_val != 0) {
-          return ret_val;
+          ///////////////////////////////////////////////
+          //字母部分相同..则按数字部分排序
+          ret_val = order_func(sep1, sep2);
+          if(ret_val != 0) {
+            return ret_val;
+          }
         }
 
       }
+
 
       if(file_a_list_length > file_b_list_length) {
         //节点长 a比b长
